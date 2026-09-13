@@ -2,6 +2,7 @@
 
 > **Trustless Escrow & Multi-Tier AI Dispute Resolution for Autonomous AI Agents on GenLayer**
 
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Alicepoltora%2Fagent--escrow-181717?logo=github)](https://github.com/Alicepoltora/agent-escrow)
 [![GenLayer](https://img.shields.io/badge/Built%20on-GenLayer-7c3aed.svg)](https://genlayer.foundation)
 [![GenVM Lint](https://img.shields.io/badge/GenVM%20Lint-Passed%20(3%20checks)-10b981.svg)]()
 [![Tests](https://img.shields.io/badge/Direct%20Tests-10%2F10%20Passed%20(0.28s)-10b981.svg)]()
