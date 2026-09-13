@@ -8,21 +8,23 @@
 [![Tests](https://img.shields.io/badge/Direct%20Tests-10%2F10%20Passed%20(0.28s)-10b981.svg)]()
 [![Live App](https://img.shields.io/badge/Live%20dApp-genlayer.arcstones.xyz-blueviolet.svg)](https://genlayer.arcstones.xyz/)
 [![Network](https://img.shields.io/badge/Network-GenLayer%20StudioNet-success.svg)](https://studio.genlayer.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
-## 🌐 Live On-Chain Deployments
+## 🌐 Live Deployments & Verification
 
 | Component | Target / Value |
 | :--- | :--- |
-| **Live Web3 Application** | [https://genlayer.arcstones.xyz/](https://genlayer.arcstones.xyz/) |
-| **Intelligent Contract** | `0x3D3b48045395DDf3A3a46d13Cc7A585fefC2083C` |
-| **Network** | GenLayer StudioNet (Chain ID: `61999`) |
+| **Production Web3 dApp** | [https://genlayer.arcstones.xyz/](https://genlayer.arcstones.xyz/) |
+| **Official GitHub Repository** | [https://github.com/Alicepoltora/agent-escrow](https://github.com/Alicepoltora/agent-escrow) |
+| **Intelligent Contract Address** | **`0x3D3b48045395DDf3A3a46d13Cc7A585fefC2083C`** |
+| **Network** | GenLayer StudioNet (Chain ID: `61999` / `0xf22f`) |
 | **RPC Endpoint** | `https://studio.genlayer.com/api` |
-| **Deployer Wallet** | `0x5465D23AFAB92787a6bF05c8F4b743f25C25f012` |
+| **Deployer Wallet Address** | `0x5465D23AFAB92787a6bF05c8F4b743f25C25f012` |
 | **Contract Deploy Tx** | `0x3af54062ea61b29f18c0faba3fb7979da79af4d74d773def8d963bb69c0c9c58` |
-| **Consensus Status** | `FINALIZED (MAJORITY_AGREE)` |
-| **Initial On-Chain Task** | Task #0 created (`0xeb397a3ee78d6a3a9ce71bd2e36278b3de241c54c3c814f3728b00f5a3900c1d`) |
+| **Consensus Finality** | `FINALIZED (MAJORITY_AGREE)` |
+| **Live Verified Task #0 Tx** | `0xeb397a3ee78d6a3a9ce71bd2e36278b3de241c54c3c814f3728b00f5a3900c1d` |
 
 ---
 
@@ -31,95 +33,118 @@
 > *"Every layer engineers the happy path. None ships dispute resolution. GenLayer fills that gap."*  
 > — **Official GenLayer Thesis**
 
-In the emerging Agentic Economy, autonomous agents hire other autonomous agents for tasks (scraping data, generating code, security auditing, training models, verifying facts).
+In the emerging Agentic Economy, autonomous software agents hire other agents to write code, conduct security audits, scrape web data, generate content, and analyze markets.
 
-Traditional blockchains force two flawed models:
-1. **Pessimistic Collateral / Deterministic Proofs**: Cannot evaluate subjective, open-ended deliverables like code, research reports, or multimodal web outputs.
-2. **Centralized Multisig / Human Arbitrators**: Breaks machine-to-machine speed, introduces human bottleneck, and doesn't scale to millions of micro-tasks.
+However, traditional blockchain escrow suffers from a fatal dilemma:
+1. **Deterministic Smart Contracts**: Cannot evaluate open-ended deliverables (code, PDFs, web apps, research reports) without rigid mathematical proofs that don't exist for creative tasks.
+2. **Centralized Human Arbitrators (Kleros / Aragon)**: Destroy the speed and autonomy of AI agents. Humans take days to resolve micro-disputes, charge exorbitant fees, and cannot scale to millions of machine-to-machine subtasks.
 
-**AgentEscrow leverages GenLayer's Intelligent Contracts to provide:**
-- **Natural Language Contract Specifications**: Clients specify task criteria in natural language.
-- **1st-Tier Consensus Evaluation**: Independent GenLayer validator nodes access the web, run LLMs, and reach non-deterministic consensus via partial field matching.
-- **2nd-Tier AI Arbitrator Appeals**: If an agent contests an outcome, a high-scrutiny Supreme AI Arbitrator evaluates counter-evidence and can overturn verdicts.
+### How AgentEscrow Solves This on GenLayer:
+* **Natural Language Specifications**: Task creators define requirements and quality bars in plain English without brittle regexes.
+* **1st-Tier Decentralized LLM Consensus**: Independent GenLayer validator nodes browse external evidence via `gl.nondet.web.render()`, execute LLM evaluations in GenVM, and reach consensus using semantic tolerance matching.
+* **2nd-Tier AI Arbitrator Appeals**: If an agent feels wronged by an initial score, it files an appeal with counter-evidence. GenLayer's multi-agent arbitration protocol reviews the dispute and can reverse or uphold the verdict trustlessly.
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Architecture & State Machine
 
-```
-                                  +---------------------------+
-                                  |     Creator Agent (A)     |
-                                  +---------------------------+
-                                                |
-                                      create_task(spec, 500)
-                                                v
-+-----------------------------------------------------------------------------------------+
-|                               AgentEscrow Intelligent Contract                          |
-|                                                                                         |
-|  [State Machine]                                                                        |
-|    OPEN  --->  CLAIMED  --->  SUBMITTED  --->  [1st Tier Consensus]                     |
-|                                                      |                                  |
-|                                    +-----------------+-----------------+                |
-|                                    v                                   v                |
-|                             ACCEPTED (paid)                    REJECTED (refunded)      |
-|                                    |                                   |                |
-|                                    +-----------------+-----------------+                |
-|                                                      |                                  |
-|                                              dispute_task(...)                          |
-|                                                      v                                  |
-|                                          [2nd Tier AI Arbitration]                      |
-|                                                      |                                  |
-|                                    +-----------------+-----------------+                |
-|                                    v                                   v                |
-|                             UPHELD (settled)                   OVERTURNED (reversed)    |
-+-----------------------------------------------------------------------------------------+
-                                                ^
-                                      submit_work(deliverable)
-                                                |
-                                  +---------------------------+
-                                  |     Worker Agent (B)      |
-                                  +---------------------------+
+```mermaid
+stateDiagram-v2
+    [*] --> Open : create_task(spec, payment)
+    Open --> Claimed : claim_task(task_id)
+    Claimed --> Submitted : submit_work(deliverable, url)
+    Open --> Submitted : submit_work(deliverable, url) [instant claim]
+    
+    state "1st-Tier Consensus Evaluation" as Tier1 {
+        Submitted --> Evaluating : evaluate_task()
+        Evaluating --> Accepted : Validators Agree (Score >= 60)
+        Evaluating --> Rejected : Validators Agree (Score < 60)
+    }
+
+    state "2nd-Tier Dispute Arbitration" as Tier2 {
+        Accepted --> Disputed : dispute_task(reason, counter_url)
+        Rejected --> Disputed : dispute_task(reason, counter_url)
+        Disputed --> Overturned : Multi-Validator Appeal (Verdict Reversed)
+        Disputed --> Upheld : Multi-Validator Appeal (Verdict Confirmed)
+    }
+
+    Accepted --> Settled : Payment Released to Worker
+    Overturned --> Settled : Rebalanced & Released
+    Rejected --> Settled : Escrow Refunded to Creator
+    Upheld --> Settled : Escrow Finalized
 ```
 
 ---
 
-## 🔬 Equivalence Principle & Consensus Design
+## 🔬 Equivalence Principle & Consensus Mechanics
 
-The contract implements GenLayer's battle-tested equivalence patterns:
+AgentEscrow leverages GenLayer's unique **Non-Deterministic Execution + Leader-Validator Consensus**:
 
-### 1. Partial Field Matching
-Natural language evaluations produce slightly varying reasoning strings across validator LLMs. AgentEscrow achieves consensus by comparing semantic invariant fields:
+### 1. Semantic Equivalence & Partial Field Matching
+Validator LLMs produce slightly different text summaries even when agreeing on the result. AgentEscrow checks invariant core fields:
 ```python
 def validator_fn(leader_result) -> bool:
     if not isinstance(leader_result, gl.vm.Return):
         return False
     val = leader_fn()
-    # 1. Exact boolean verdict agreement
+    
+    # 1. Exact boolean agreement on pass/fail verdict
     if leader_result.calldata.get("accepted") != val.get("accepted"):
         return False
-    # 2. Score agreement within ±15 points tolerance
+        
+    # 2. Score agreement within a ±15 point tolerance band
     leader_score = int(leader_result.calldata.get("score", 0))
     val_score = int(val.get("score", 0))
     if abs(leader_score - val_score) > 15:
         return False
+        
     return True
 ```
 
 ### 2. Multi-Modal Web Grounding
-Validators fetch external evidence via `gl.nondet.web.render(url, mode="text")` to ground LLM reasoning in verified web data (GitHub commits, test coverage artifacts, deployed URLs).
+Validators inspect real deliverables directly using GenLayer's native web engine:
+```python
+# Renders public web evidence (GitHub PRs, Twitter/X threads, documentation)
+web_data = gl.nondet.web.render(evidence_url, mode="text")
+external_context = f"Evidence from {evidence_url}:\n{web_data[:2000]}"
+```
 
-### 3. Two-Tier Dispute Resolution
-When an agent appeals with new counter-evidence, a separate arbitration round runs with an adversarial impartiality prompt, capable of safely rebalancing escrow accounts.
+### 3. Trustless Dispute Resolution Protocol
+```python
+@gl.public.write
+def dispute_task(self, task_id: u256, dispute_reason: str, counter_evidence_url: str = "") -> dict:
+    # 1. Verify caller is creator or worker
+    # 2. Extract original submission + new counter-evidence
+    # 3. Independent validator LLMs arbitrate whether initial decision had merit
+    # 4. If overturned: safely transfer escrow to rightful party and adjust on-chain reputation
+```
 
 ---
 
-## 🧪 Testing & Validation
+## ⚡ Multi-Modal Web3 & AI Agent Connection
 
-### 1. Contract Linter
+The frontend at [https://genlayer.arcstones.xyz/](https://genlayer.arcstones.xyz/) features a flexible wallet identity system:
+
+1. **🦊 Browser Wallet (MetaMask / EIP-1193)**:
+   - Auto-prompts addition/switch to **GenLayer StudioNet** (Chain ID: `61999`, RPC: `https://studio.genlayer.com/api`).
+2. **🤖 Autonomous AI Agent Mode**:
+   - Register or connect an AI agent identity with custom handle and capability tags (*Auditor*, *Researcher*, *Content Specialist*, *Arbitrator*).
+   - Generates or imports agent signing keys for autonomous execution.
+3. **🔑 1-Click StudioNet Dev Account**:
+   - Instant access using the funded deployer address (`0x5465...f012`) with 20.0 GEN, allowing immediate test-driving without wallet extensions.
+4. **🤖 Agent Developer Hub & Live Simulator**:
+   - In-app interactive simulator where a virtual agent (`AutoDev-Agent`) autonomously discovers tasks, claims them, and submits work.
+   - Copyable Python (`genlayer_py`) and JavaScript snippets for autonomous bots.
+
+---
+
+## 🧪 Testing & Verification
+
+### 1. GenVM Intelligent Contract Linting
 ```bash
-/root/agent-escrow/.venv/bin/genvm-lint check contracts/agent_escrow.py
+genvm-lint check contracts/agent_escrow.py
 ```
-**Output:**
+**Result:**
 ```
 ✓ Lint passed (3 checks)
 ✓ Validation passed
@@ -129,10 +154,9 @@ When an agent appeals with new counter-evidence, a separate arbitration round ru
 
 ### 2. Direct Mode Unit Tests (In-Memory GenVM Simulator)
 ```bash
-cd /root/agent-escrow
-.venv/bin/pytest tests/direct/test_agent_escrow.py -v
+pytest tests/direct/test_agent_escrow.py -v
 ```
-**Output:**
+**Result:**
 ```
 tests/direct/test_agent_escrow.py::test_create_task PASSED               [ 10%]
 tests/direct/test_agent_escrow.py::test_create_task_empty_spec_fails PASSED [ 20%]
@@ -150,47 +174,106 @@ tests/direct/test_agent_escrow.py::test_dispute_resolution_uphold PASSED [100%]
 
 ---
 
-## 🖥️ Frontend Dashboard
+## 🚀 Quickstart Guide
 
-A state-of-the-art Web3 / Agent portal built with React 19, Vite, and custom cyberpunk glassmorphism CSS:
+### Prerequisites
+* Python 3.12+
+* Node.js 18+ and npm
 
-- **Interactive Task Pipeline**: Open, Claimed, Submitted, Evaluated, and Disputed tasks.
-- **Consensus & Dispute Modal**: Inspect LLM evaluation breakdown, evidence verification, and live AI dispute appeals.
-- **Simulated Agent Actions**: Trigger mock submissions, consensus validations, and dispute appeals with instant feedback.
-- **Agent Reputation & Balance Leaderboard**: Real-time tracking of agent credits and trust scores.
-
-### Running the Frontend
+### 1. Clone & Setup Environment
 ```bash
-cd /root/agent-escrow/frontend
-npm run dev -- --host 0.0.0.0 --port 3000
+git clone https://github.com/Alicepoltora/agent-escrow.git
+cd agent-escrow
+
+# Python environment
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
 ```
-Or view the pre-built distribution in `/root/agent-escrow/frontend/dist`.
+
+### 2. Run Local Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+### 3. Programmatic Agent Integration (Python)
+```python
+import os
+import genlayer_py as gl
+from eth_account import Account
+
+# Connect agent wallet
+agent_account = Account.from_key(os.getenv("GENLAYER_PRIVATE_KEY", "0x..."))
+client = gl.create_client(gl.studionet, account=agent_account)
+CONTRACT_ADDR = "0x3D3b48045395DDf3A3a46d13Cc7A585fefC2083C"
+
+# 1. Query an open task
+task = client.read_contract(CONTRACT_ADDR, "get_task", [1])
+print(f"Task #{task['id']}: {task['spec']}")
+
+# 2. Submit deliverable
+tx = client.write_contract(
+    address=CONTRACT_ADDR,
+    function_name="submit_work",
+    args=[1, "https://github.com/agent-tank/sample-deliverable", "https://x.com/agent_proof"]
+)
+print("Work submitted on-chain:", tx)
+
+# 3. Request decentralized AI consensus evaluation
+client.write_contract(CONTRACT_ADDR, "evaluate_task", [1])
+```
 
 ---
 
-## 📁 Repository Structure
+## 📁 Project Structure
 
 ```
-/root/agent-escrow/
+agent-escrow/
 ├── contracts/
 │   ├── __init__.py
-│   └── agent_escrow.py            # Intelligent Contract (10 methods)
+│   └── agent_escrow.py            # GenLayer Intelligent Contract (10 methods)
 ├── tests/
-│   ├── __init__.py
 │   └── direct/
-│       ├── __init__.py
-│       ├── conftest.py            # Address helper fixture
-│       └── test_agent_escrow.py   # 10 unit tests covering all flows
+│       ├── conftest.py            # GenVM address fixtures
+│       └── test_agent_escrow.py   # 10 unit tests covering lifecycle & disputes
 ├── frontend/                      # React 19 + Vite Web Application
+│   ├── public/
+│   │   └── favicon.svg            # Circular metallic AE brand icon
 │   ├── src/
-│   │   ├── App.jsx                # Interactive escrow portal
-│   │   ├── index.css              # Custom dark glassmorphism design system
-│   │   └── main.jsx
-│   ├── dist/                      # Production build
-│   └── package.json
-├── gltest.config.yaml             # GenLayer testnet/localnet config
-├── pyproject.toml                 # Pytest configuration
-├── requirements.txt               # GenLayer SDK dependencies
-├── ARCHITECTURE.md                # Comprehensive technical specification
-└── README.md                      # Documentation & guides
+│   │   ├── App.jsx                # Web3 portal, Connect Wallet, Agent Hub
+│   │   └── index.css              # Custom modern light design system
+│   └── index.html
+├── scripts/
+│   ├── deploy_contract.py         # Automated deployment script to StudioNet
+│   └── agent_flow_demo.py         # End-to-end simulation runner
+├── artifacts/
+│   └── deployment.json            # On-chain contract & tx metadata
+├── .env.example                   # Environment configuration template
+├── ARCHITECTURE.md                # In-depth architectural manifesto
+├── SUBMISSION.md                  # Hackathon pitch & submission package
+├── DEMO_SCRIPT.md                 # 3-minute video presentation script
+└── README.md
 ```
+
+---
+
+## 🏆 Hackathon Submission Checklist
+
+- [x] **Intelligent Contract written in Python**: Validated with `genvm-lint`.
+- [x] **Live on GenLayer StudioNet**: Finalized at `0x3D3b48045395DDf3A3a46d13Cc7A585fefC2083C`.
+- [x] **Non-Deterministic Capabilities**: Utilizes `gl.nondet.exec_prompt()` and `gl.nondet.web.render()`.
+- [x] **Equivalence Principle Enforced**: Deterministic consensus via invariant field matching.
+- [x] **Dispute Resolution Mechanism**: Direct realization of GenLayer's primary thesis.
+- [x] **Live Public dApp**: Deployed at [https://genlayer.arcstones.xyz/](https://genlayer.arcstones.xyz/) with SSL.
+- [x] **Comprehensive Test Suite**: 10 unit tests passing in 0.28s.
+- [x] **Open Source Repository**: [https://github.com/Alicepoltora/agent-escrow](https://github.com/Alicepoltora/agent-escrow).
+
+---
+
+## 📄 License
+
+MIT License. Built for the [GenLayer Agent Tank](https://portal.genlayer.foundation/agent-tank/) Hackathon 2026.
