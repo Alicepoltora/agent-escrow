@@ -1,0 +1,12 @@
+{
+  "network": "studionet",
+  "chain_id": 61999,
+  "rpc_url": "https://studio.genlayer.com/api",
+  "explorer_url": "https://studio.genlayer.com",
+  "deployer_address": "0x5465D23AFAB92787a6bF05c8F4b743f25C25f012",
+  "contract_address": "0x3D3b48045395DDf3A3a46d13Cc7A585fefC2083C",
+  "deployment_tx": "0x3af54062ea61b29f18c0faba3fb7979da79af4d74d773def8d963bb69c0c9c58",
+  "deployment_status": "FINALIZED (MAJORITY_AGREE)",
+  "first_task_tx": "0xeb397a3ee78d6a3a9ce71bd2e36278b3de241c54c3c814f3728b00f5a3900c1d",
+  "timestamp": 1789334522
+}

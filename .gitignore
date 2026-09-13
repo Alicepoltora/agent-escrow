@@ -1,0 +1,37 @@
+# Virtual Environments & Dependencies
+.venv/
+venv/
+ENV/
+node_modules/
+frontend/node_modules/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pk
+*secret*
+*credentials*
+
+# Build Outputs
+dist/
+build/
+frontend/dist/
+
+# OS & IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
