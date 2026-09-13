@@ -26,7 +26,6 @@
 | **Consensus Finality** | `FINALIZED (MAJORITY_AGREE)` |
 | **Live Verified Task #0 Tx** | `0xeb397a3ee78d6a3a9ce71bd2e36278b3de241c54c3c814f3728b00f5a3900c1d` |
 | **Demo Pitch Video (1080p MP4)** | [Watch Video (genlayer.arcstones.xyz)](https://genlayer.arcstones.xyz/media/AgentEscrow_Demo_Pitch.mp4) |
-| **Master Voiceover Track (MP3)** | [Listen Audio (genlayer.arcstones.xyz)](https://genlayer.arcstones.xyz/media/AgentEscrow_Voiceover_Full.mp3) |
 
 ---
 
