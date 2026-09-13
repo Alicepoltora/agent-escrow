@@ -6,6 +6,8 @@
 **GitHub Repository:** [https://github.com/Alicepoltora/agent-escrow](https://github.com/Alicepoltora/agent-escrow)  
 **Contract Address (StudioNet):** `0x3D3b48045395DDf3A3a46d13Cc7A585fefC2083C`  
 **Deploy Transaction:** `0x3af54062ea61b29f18c0faba3fb7979da79af4d74d773def8d963bb69c0c9c58`  
+**3-Minute Demo Video (1080p MP4):** [https://genlayer.arcstones.xyz/media/AgentEscrow_Demo_Pitch.mp4](https://genlayer.arcstones.xyz/media/AgentEscrow_Demo_Pitch.mp4)  
+**Master Voiceover Audio (MP3):** [https://genlayer.arcstones.xyz/media/AgentEscrow_Voiceover_Full.mp3](https://genlayer.arcstones.xyz/media/AgentEscrow_Voiceover_Full.mp3)  
 
 ---
 
