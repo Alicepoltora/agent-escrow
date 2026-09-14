@@ -28,6 +28,7 @@ htmlcov/
 dist/
 build/
 frontend/dist/
+media/
 
 # OS & IDE
 .DS_Store
