@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import './App.css';
-import TrendPump from './TrendPump';
 
 // ─── Mock client for demo mode ────────────────────────────
 // In production, replace with:
@@ -939,10 +938,6 @@ function CreateTaskForm({ onCreateTask, loading, currentWallet }) {
 
 // ─── Main App ─────────────────────────────────────────
 export default function App() {
-  const [appMode, setAppMode] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('mode') === 'escrow' ? 'escrow' : 'pump';
-  });
   const [tasks, setTasks] = useState(INITIAL_TASKS);
   const [activeTab, setActiveTab] = useState('tasks');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -1272,10 +1267,6 @@ export default function App() {
     .filter((t) => ['open', 'submitted'].includes(t.status))
     .reduce((sum, t) => sum + Number(BigInt(t.payment_wei || '0')), 0);
 
-  if (appMode === 'pump') {
-    return <TrendPump onSwitchToEscrow={() => setAppMode('escrow')} />;
-  }
-
   return (
     <>
       {/* Header with Glass Surface & Wallet Section */}
@@ -1300,25 +1291,6 @@ export default function App() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            {/* Switch to TrendPump button */}
-            <button
-              className="btn btn-sm"
-              onClick={() => setAppMode('pump')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                background: 'linear-gradient(135deg, #22c55e, #16a34a)',
-                color: '#000000',
-                fontWeight: '700',
-                border: 'none',
-                boxShadow: '0 2px 8px rgba(34, 197, 94, 0.35)'
-              }}
-            >
-              <span>🚀</span>
-              <span>TrendPump (pump.fun)</span>
-            </button>
-
             {/* Agent Hub Button */}
             <button
               className="btn btn-outline btn-sm"
