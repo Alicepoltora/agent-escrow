@@ -1,12 +1,26 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import './App.css';
 
-// ─── Mock client for demo mode ────────────────────────────
-// In production, replace with:
-// import { createClient, createAccount } from 'genlayer-js';
-// import { testnetAsimov } from 'genlayer-js/chains';
+import {
+  CONTRACT_ADDRESS,
+  DEPLOY_TX_HASH,
+  EXPLORER_URL,
+  RPC_URL,
+  CHAIN_ID,
+  CHAIN_HEX,
+  DEFAULT_CREATOR_KEY,
+  DEFAULT_CREATOR_ADDR,
+  DEFAULT_WORKER_KEY,
+  DEFAULT_WORKER_ADDR,
+  fetchAllTasks,
+  createTaskOnChain,
+  submitWorkOnChain,
+  evaluateTaskOnChain,
+  disputeTaskOnChain,
+  fundAccount
+} from './genlayer';
 
-const DEMO_MODE = true;
+const DEMO_MODE = false;
 
 const INITIAL_TASKS = [
   {
@@ -185,7 +199,7 @@ function ConnectWalletModal({ isOpen, onClose, onConnectBrowser, onConnectAgent,
                   <span className="wallet-role-badge browser">EIP-1193</span>
                 </div>
                 <div className="wallet-option-desc">
-                  Connect MetaMask or Rabby. Auto-configures GenLayer StudioNet (Chain ID 61999).
+                  Connect MetaMask or Rabby. Auto-configures GenLayer Studio Next (Chain ID 61997).
                 </div>
               </div>
               <span style={{ fontSize: 18, color: 'var(--text-muted)' }}>→</span>
@@ -202,7 +216,7 @@ function ConnectWalletModal({ isOpen, onClose, onConnectBrowser, onConnectAgent,
                   <span className="wallet-role-badge agent">Autonomous</span>
                 </div>
                 <div className="wallet-option-desc">
-                  Register or connect an autonomous bot/agent with automated task execution rights.
+                  Register or connect an autonomous bot/agent with automated task execution rights on Studio Next.
                 </div>
               </div>
               <span style={{ fontSize: 18, color: 'var(--text-muted)' }}>→</span>
@@ -215,11 +229,11 @@ function ConnectWalletModal({ isOpen, onClose, onConnectBrowser, onConnectAgent,
               </div>
               <div style={{ flex: 1 }}>
                 <div className="wallet-option-title">
-                  StudioNet Dev Account
-                  <span className="wallet-role-badge demo">1-Click (20 GEN)</span>
+                  Studio Next Dev Account
+                  <span className="wallet-role-badge demo">1-Click (95+ GEN)</span>
                 </div>
                 <div className="wallet-option-desc">
-                  Instant access with funded deployer key (`0x5465...f012`). No extension needed.
+                  Instant access with pre-funded deployer key (`0x70BE...EcCF`). No extension needed.
                 </div>
               </div>
               <span style={{ fontSize: 18, color: 'var(--text-muted)' }}>→</span>
@@ -227,7 +241,7 @@ function ConnectWalletModal({ isOpen, onClose, onConnectBrowser, onConnectAgent,
 
             <div style={{ textAlign: 'center', marginTop: 16 }}>
               <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                Powered by GenLayer Intelligent Contracts · StudioNet RPC
+                Powered by GenLayer Intelligent Contracts · Studio Next RPC (Chain 61997)
               </span>
             </div>
           </div>
@@ -379,16 +393,22 @@ function AgentHubModal({ isOpen, onClose, onRunSimulator, simulatorRunning }) {
           </div>
           <div className="detail-row">
             <span className="detail-label">Network</span>
-            <span className="detail-value">GenLayer StudioNet (Chain ID: 61999)</span>
+            <span className="detail-value">GenLayer Studio Next (Chain ID: 61997)</span>
           </div>
           <div className="detail-row">
             <span className="detail-label">RPC Endpoint</span>
-            <span className="detail-value mono">https://studio.genlayer.com/api</span>
+            <span className="detail-value mono">https://studio-dev.genlayer.com/api</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-label">Explorer</span>
+            <a href={`${EXPLORER_URL}/address/${CONTRACT_ADDRESS}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-blue)', textDecoration: 'underline' }}>
+              explorer-studio-dev.genlayer.com ↗
+            </a>
           </div>
           <div className="detail-row">
             <span className="detail-label">Contract Address</span>
             <span className="detail-value mono" style={{ color: 'var(--accent-purple)', fontWeight: 600 }}>
-              0x3D3b48045395DDf3A3a46d13Cc7A585fefC2083C
+              {CONTRACT_ADDRESS}
             </span>
           </div>
         </div>
@@ -396,16 +416,20 @@ function AgentHubModal({ isOpen, onClose, onRunSimulator, simulatorRunning }) {
         {/* Python Code Snippet */}
         <div>
           <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-            Python Agent Worker Integration (genlayer_py)
+            Python Agent Worker Integration (genlayer_py / Studio Next)
           </div>
           <div className="code-snippet-box">
 {`import genlayer_py as gl
 from eth_account import Account
+import copy
 
-# 1. Initialize Autonomous Agent
+# 1. Initialize Autonomous Agent on Studio Next (chain 61997)
 agent_acc = Account.from_key("0x_YOUR_AGENT_PRIVATE_KEY")
-client = gl.create_client(gl.studionet, account=agent_acc)
-CONTRACT = "0x3D3b48045395DDf3A3a46d13Cc7A585fefC2083C"
+studio_next = copy.deepcopy(gl.studionet)
+studio_next.id = 61997
+studio_next.rpc_urls = {'default': {'http': ['https://studio-dev.genlayer.com/api']}}
+client = gl.create_client(studio_next, account=agent_acc)
+CONTRACT = "${CONTRACT_ADDRESS}"
 
 # 2. Query open tasks for work
 task = client.read_contract(CONTRACT, "get_task", [1])
@@ -415,7 +439,7 @@ print(f"Task #{task['id']} Spec: {task['spec']}")
 client.write_contract(
     address=CONTRACT,
     function_name="submit_work",
-    args=[1, "https://github.com/agent/audit-output", "https://x.com/agent-proof"]
+    args=[1, "Autonomous deliverable proof", "https://github.com/agent/audit-output"]
 )
 
 # 4. Trigger GenLayer Decentralized AI Consensus
@@ -577,10 +601,21 @@ function TaskModal({ task, onClose, onSubmitWork, onEvaluate, onDispute, loading
         {task.dispute_reason && (
           <div className="nested-panel" style={{ background: '#fffbeb', borderLeft: '4px solid var(--accent-orange)' }}>
             <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'var(--accent-orange-dark)', marginBottom: 6 }}>
-              ⚖️ Dispute Resolution Record
+              ⚖️ Dispute Grounds Filed
             </div>
             <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
               {task.dispute_reason}
+            </div>
+          </div>
+        )}
+
+        {task.appeal_verdict && (
+          <div className="nested-panel" style={{ background: '#f0fdf4', borderLeft: '4px solid #10b981', marginTop: 10 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: '#047857', marginBottom: 6 }}>
+              ⚖️ Supreme AI Arbitration Verdict ({task.status.toUpperCase()})
+            </div>
+            <div style={{ fontSize: 13, color: '#065f46', lineHeight: 1.6 }}>
+              {task.appeal_verdict}
             </div>
           </div>
         )}
@@ -589,21 +624,28 @@ function TaskModal({ task, onClose, onSubmitWork, onEvaluate, onDispute, loading
         <div className="consensus-box">
           <div className="consensus-header">
             <span>🛡️ GenLayer Intelligent Contract Verifier</span>
-            <span style={{ fontSize: 11, background: '#e0e7ff', color: '#4338ca', padding: '2px 8px', borderRadius: '4px' }}>
-              StudioNet Live
+            <span style={{ fontSize: 11, background: '#e0e7ff', color: '#4338ca', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
+              Studio Next (Chain 61997)
             </span>
           </div>
           <div className="consensus-check-item">
             <span style={{ color: 'var(--accent-green)' }}>✓</span>
-            <span>Deterministic contract execution on GenVM</span>
+            <span>Deterministic state transitions on GenVM</span>
           </div>
           <div className="consensus-check-item">
             <span style={{ color: 'var(--accent-green)' }}>✓</span>
-            <span>Leader-Validator Equivalence Principle enforced</span>
+            <span>Equivalence Principle across validator LLMs</span>
           </div>
           <div className="consensus-check-item">
-            <span style={{ color: 'var(--accent-green)' }}>✓</span>
-            <span>Autonomous AI agent settlement capability</span>
+            <span style={{ color: 'var(--accent-green)' }}>🔗</span>
+            <a
+              href={`${EXPLORER_URL}/address/${CONTRACT_ADDRESS}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'var(--accent-blue)', textDecoration: 'underline' }}
+            >
+              Contract: {shortenAddress(CONTRACT_ADDRESS)} on Explorer
+            </a>
           </div>
         </div>
 
@@ -945,14 +987,15 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [toasts, setToasts] = useState([]);
 
-  // Wallet Management State
+  // Wallet Management State - Default to pre-funded Studio Next dev agent account
   const [wallet, setWallet] = useState({
     connected: true,
-    address: '0x5465D23AFAB92787a6bF05c8F4b743f25C25f012',
-    balance: '20.0',
-    type: 'demo', // 'browser' | 'agent' | 'demo'
-    name: 'StudioNet Dev',
-    role: 'Creator / Employer',
+    address: DEFAULT_CREATOR_ADDR,
+    balance: '95.0',
+    type: 'agent', // 'browser' | 'agent' | 'demo'
+    name: 'Studio Next Dev Agent',
+    role: 'Autonomous Agent / Creator',
+    privateKey: DEFAULT_CREATOR_KEY,
   });
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isAgentHubOpen, setIsAgentHubOpen] = useState(false);
@@ -977,17 +1020,35 @@ export default function App() {
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4500);
+    }, 5500);
   }, []);
 
   const dismissToast = useCallback((id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  // Browser Wallet Connection (MetaMask / EIP-1193)
+  // Fetch live tasks directly from Studio Next contract storage
+  const loadTasks = useCallback(async () => {
+    try {
+      const liveTasks = await fetchAllTasks();
+      if (liveTasks && liveTasks.length > 0) {
+        setTasks(liveTasks);
+      }
+    } catch (err) {
+      console.warn('Could not fetch tasks from Studio Next contract:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadTasks();
+    const interval = setInterval(loadTasks, 12000);
+    return () => clearInterval(interval);
+  }, [loadTasks]);
+
+  // Browser Wallet Connection (MetaMask / EIP-1193 on Studio Next 61997)
   const handleConnectBrowser = async () => {
     if (typeof window.ethereum === 'undefined') {
-      addToast('🦊 MetaMask extension not detected in this browser. You can connect as an AI Agent or use the 1-Click Dev Wallet.', 'error');
+      addToast('🦊 MetaMask extension not detected. You can connect with the Studio Next Agent or 1-Click Dev Wallet.', 'error');
       return;
     }
 
@@ -997,22 +1058,22 @@ export default function App() {
       if (accounts && accounts.length > 0) {
         const userAddr = accounts[0];
 
-        // Attempt network switch or add
+        // Attempt network switch or add for chain 61997
         try {
           await window.ethereum.request({
             method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0xf22f' }], // 61999 in hex
+            params: [{ chainId: CHAIN_HEX }], // 0xf22d = 61997
           });
         } catch (switchErr) {
           if (switchErr.code === 4902) {
             await window.ethereum.request({
               method: 'wallet_addEthereumChain',
               params: [{
-                chainId: '0xf22f',
-                chainName: 'GenLayer StudioNet',
-                rpcUrls: ['https://studio.genlayer.com/api'],
+                chainId: CHAIN_HEX,
+                chainName: 'GenLayer Studio Next',
+                rpcUrls: [RPC_URL],
                 nativeCurrency: { name: 'GenLayer Token', symbol: 'GEN', decimals: 18 },
-                blockExplorerUrls: ['https://scan.genlayer.com'],
+                blockExplorerUrls: [EXPLORER_URL],
               }],
             });
           }
@@ -1021,13 +1082,14 @@ export default function App() {
         setWallet({
           connected: true,
           address: userAddr,
-          balance: '15.5',
+          balance: '25.0',
           type: 'browser',
           name: 'MetaMask Web3',
           role: 'Employer / Worker',
+          privateKey: DEFAULT_CREATOR_KEY,
         });
         setIsWalletModalOpen(false);
-        addToast(`🦊 Connected browser wallet: ${shortenAddress(userAddr)}`, 'success');
+        addToast(`🦊 Connected browser wallet: ${shortenAddress(userAddr)} (Chain 61997)`, 'success');
       }
     } catch (err) {
       addToast(`❌ Browser connection failed: ${err.message}`, 'error');
@@ -1038,30 +1100,34 @@ export default function App() {
 
   // Connect as Autonomous AI Agent
   const handleConnectAgent = (name, role, mockAddr, privateKey) => {
+    const finalKey = privateKey || DEFAULT_WORKER_KEY;
+    const finalAddr = mockAddr || DEFAULT_WORKER_ADDR;
+    fundAccount(finalAddr, '50');
     setWallet({
       connected: true,
-      address: mockAddr,
+      address: finalAddr,
       balance: '50.0',
       type: 'agent',
       name: name,
       role: role,
-      privateKey: privateKey,
+      privateKey: finalKey,
     });
-    addToast(`🤖 AI Agent Connected: ${name} (${role})`, 'success');
+    addToast(`🤖 AI Agent Connected: ${name} (${role}) on Studio Next`, 'success');
   };
 
-  // Connect to StudioNet Demo Account
+  // Connect to Studio Next Demo Account
   const handleConnectDemo = () => {
     setWallet({
       connected: true,
-      address: '0x5465D23AFAB92787a6bF05c8F4b743f25C25f012',
-      balance: '20.0',
+      address: DEFAULT_CREATOR_ADDR,
+      balance: '95.0',
       type: 'demo',
-      name: 'StudioNet Dev',
+      name: 'Studio Next Dev',
       role: 'Creator / Employer',
+      privateKey: DEFAULT_CREATOR_KEY,
     });
     setIsWalletModalOpen(false);
-    addToast('🔑 Connected to StudioNet Dev Account (20.0 GEN)', 'success');
+    addToast('🔑 Connected to Studio Next Dev Account (95+ GEN on chain 61997)', 'success');
   };
 
   const handleDisconnect = () => {
@@ -1072,6 +1138,7 @@ export default function App() {
       type: null,
       name: '',
       role: '',
+      privateKey: null,
     });
     setIsDropdownOpen(false);
     addToast('🔌 Wallet disconnected.', 'info');
@@ -1085,174 +1152,126 @@ export default function App() {
     }
   };
 
-  // Autonomous Agent Simulator
+  // Autonomous Agent Simulator - Real On-Chain Execution
   const handleRunSimulator = async () => {
     setIsAgentHubOpen(false);
     setSimulatorRunning(true);
-    addToast('🤖 Autonomous Agent `DeepAudit-Agent-v2` scanning open tasks on GenLayer...', 'info');
+    addToast('🤖 Autonomous Agent scanning live tasks on GenLayer Studio Next contract...', 'info');
 
     try {
-      await new Promise((r) => setTimeout(r, 1400));
-      const openTask = tasks.find((t) => t.status === 'open');
-      const targetId = openTask ? openTask.id : 1;
+      const liveTasks = await fetchAllTasks();
+      let targetTask = liveTasks.find((t) => t.status === 'open');
 
-      addToast(`⚡ Agent claimed Task #${targetId}. Generating deliverable proof...`, 'info');
-      await new Promise((r) => setTimeout(r, 1800));
+      if (!targetTask) {
+        addToast('⚡ No open tasks found. Creating autonomous benchmark task on chain 61997...', 'info');
+        const spec = 'Autonomous Agent Benchmark: verify mathematical consensus invariants on GenLayer Intelligent Contract';
+        const { txHash } = await createTaskOnChain(DEFAULT_CREATOR_KEY, spec, '5.0');
+        addToast(`✅ Benchmark task created! Tx: ${txHash.slice(0, 10)}...`, 'success');
+        const refreshed = await fetchAllTasks();
+        targetTask = refreshed.find((t) => t.status === 'open') || refreshed[0];
+      }
 
-      const deliverableUrl = 'https://github.com/agent-tank/autonomous-audit-proof-v2';
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === targetId
-            ? { ...t, status: 'submitted', worker: '0x8f2e...c4d1 (AutoAgent)', result_url: deliverableUrl }
-            : t
-        )
-      );
-      addToast(`📤 Deliverable submitted for Task #${targetId}! Validators performing AI consensus...`, 'success');
+      if (targetTask && targetTask.status === 'open') {
+        addToast(`📤 Submitting deliverable for Task #${targetTask.id} to on-chain contract...`, 'info');
+        const deliverable = 'Autonomous audit deliverable: verified AST consistency and GenVM execution proofs.';
+        const proofUrl = 'https://github.com/agent-tank/autonomous-audit-proof-v2';
+        const { txHash: subHash } = await submitWorkOnChain(DEFAULT_WORKER_KEY, targetTask.id, deliverable, proofUrl);
+        addToast(`✅ Deliverable confirmed on-chain! Tx: ${subHash.slice(0, 10)}...`, 'success');
 
-      await new Promise((r) => setTimeout(r, 2200));
-      const score = 88;
-      const evaluation = 'Deliverable verified by 5 independent validator LLMs. High-precision execution meeting all task constraints.';
-      
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === targetId
-            ? { ...t, status: 'accepted', score, evaluation }
-            : t
-        )
-      );
-      addToast(`🎉 Task #${targetId} accepted by consensus! Payment automatically released to autonomous agent.`, 'success');
+        addToast(`🤖 Triggering GenLayer AI validator consensus on GenVM for Task #${targetTask.id}...`, 'info');
+        const { txHash: evalHash, task } = await evaluateTaskOnChain(DEFAULT_CREATOR_KEY, targetTask.id);
+        addToast(`🎉 Task #${targetTask.id} evaluated by consensus! Score: ${task.score}/100. Tx: ${evalHash.slice(0, 10)}...`, 'success');
+      }
+
+      await loadTasks();
     } catch (err) {
+      console.error(err);
       addToast(`❌ Simulator error: ${err.message}`, 'error');
     } finally {
       setSimulatorRunning(false);
     }
   };
 
+  // Live on-chain task creation
   const handleCreateTask = useCallback(async (spec, payment) => {
     setLoading(true);
+    addToast('🔒 Broadcasting `create_task` transaction to GenLayer Studio Next (chain 61997)...', 'info');
     try {
-      if (DEMO_MODE) {
-        await new Promise((r) => setTimeout(r, 1200));
-        const newTask = {
-          id: tasks.length,
-          creator: wallet.address ? shortenAddress(wallet.address) : '0x5465...f012',
-          worker: '0x0000...0000',
-          spec,
-          payment_wei: String(BigInt(Math.floor(parseFloat(payment) * 1e18))),
-          result_url: '',
-          status: 'open',
-          score: 0,
-          evaluation: '',
-          dispute_reason: '',
-        };
-        setTasks((prev) => [newTask, ...prev]);
-        addToast(`✅ Task #${newTask.id} created! ${payment} GEN locked into GenLayer contract escrow.`, 'success');
-        setActiveTab('tasks');
-        setStatusFilter('all');
-      }
+      const pKey = wallet.privateKey || DEFAULT_CREATOR_KEY;
+      const { txHash } = await createTaskOnChain(pKey, spec, payment);
+      addToast(`✅ Task created on-chain! Tx: ${txHash.slice(0, 10)}...`, 'success');
+      await loadTasks();
+      setActiveTab('tasks');
+      setStatusFilter('all');
     } catch (err) {
-      addToast(`❌ Error: ${err.message}`, 'error');
+      console.error(err);
+      addToast(`❌ Create Task failed: ${err.message}`, 'error');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, [tasks, wallet.address, addToast]);
+  }, [wallet.privateKey, loadTasks, addToast]);
 
+  // Live on-chain work submission
   const handleSubmitWork = useCallback(async (taskId, resultUrl) => {
     setLoading(true);
+    addToast(`📤 Submitting deliverable for Task #${taskId} to GenLayer contract...`, 'info');
     try {
-      if (DEMO_MODE) {
-        await new Promise((r) => setTimeout(r, 1000));
-        const workerAddr = wallet.address ? shortenAddress(wallet.address) : '0x5465...f012';
-        setTasks((prev) =>
-          prev.map((t) =>
-            t.id === taskId
-              ? { ...t, status: 'submitted', result_url: resultUrl, worker: workerAddr }
-              : t
-          )
-        );
-        setSelectedTask((prev) => (prev && prev.id === taskId ? { ...prev, status: 'submitted', result_url: resultUrl, worker: workerAddr } : prev));
-        addToast(`📤 Work submitted for Task #${taskId}! Ready for AI validator consensus.`, 'success');
-      }
+      const pKey = wallet.privateKey || DEFAULT_WORKER_KEY;
+      const deliverable = `Deliverable submitted via AgentEscrow dApp. Verified evidence attached: ${resultUrl}`;
+      const { txHash } = await submitWorkOnChain(pKey, taskId, deliverable, resultUrl);
+      addToast(`✅ Deliverable confirmed on-chain! Tx: ${txHash.slice(0, 10)}...`, 'success');
+      await loadTasks();
+      setSelectedTask((prev) => (prev && prev.id === taskId ? { ...prev, status: 'submitted', result_url: resultUrl } : prev));
     } catch (err) {
-      addToast(`❌ Error: ${err.message}`, 'error');
+      console.error(err);
+      addToast(`❌ Submit Work failed: ${err.message}`, 'error');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, [wallet.address, addToast]);
+  }, [wallet.privateKey, loadTasks, addToast]);
 
+  // Live on-chain AI consensus evaluation
   const handleEvaluate = useCallback(async (taskId) => {
     setLoading(true);
-    addToast('🤖 Triggering GenLayer AI validators with Equivalence Principle...', 'info');
+    addToast('🤖 Triggering GenLayer AI validator consensus on GenVM (leader + validator LLMs)...', 'info');
     try {
-      if (DEMO_MODE) {
-        await new Promise((r) => setTimeout(r, 2400));
-        const score = 65 + Math.floor(Math.random() * 30);
-        const accepted = score >= 60;
-        const evaluation = accepted
-          ? 'Work fully satisfies task requirements with high technical precision. Quorum verified by independent validators.'
-          : 'Work falls short of required quality bar. Consensus reached to reject and return escrow to creator.';
-
-        setTasks((prev) =>
-          prev.map((t) =>
-            t.id === taskId
-              ? { ...t, status: accepted ? 'accepted' : 'rejected', score, evaluation }
-              : t
-          )
-        );
-        setSelectedTask((prev) =>
-          prev && prev.id === taskId ? { ...prev, status: accepted ? 'accepted' : 'rejected', score, evaluation } : prev
-        );
-        addToast(
-          accepted
-            ? `✅ Task #${taskId} accepted! Score: ${score}/100. Escrow released to worker.`
-            : `❌ Task #${taskId} rejected. Score: ${score}/100. Escrow refunded to creator.`,
-          accepted ? 'success' : 'error'
-        );
-      }
+      const pKey = wallet.privateKey || DEFAULT_CREATOR_KEY;
+      const { txHash, task } = await evaluateTaskOnChain(pKey, taskId);
+      const isAccepted = task.status === 'accepted';
+      addToast(
+        `${isAccepted ? '✅' : '❌'} AI Consensus finalized! Score: ${task.score}/100. Tx: ${txHash.slice(0, 10)}...`,
+        isAccepted ? 'success' : 'error'
+      );
+      await loadTasks();
+      setSelectedTask(task);
     } catch (err) {
-      addToast(`❌ Error: ${err.message}`, 'error');
+      console.error(err);
+      addToast(`❌ AI Evaluation failed: ${err.message}`, 'error');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, [addToast]);
+  }, [wallet.privateKey, loadTasks, addToast]);
 
+  // Live on-chain supreme AI arbitration dispute
   const handleDispute = useCallback(async (taskId, reason) => {
     setLoading(true);
-    addToast('⚖️ GenLayer Multi-Tier Arbitration in progress across validator nodes...', 'info');
+    addToast('⚖️ GenLayer Multi-Tier Arbitration in progress across validator nodes on Studio Next...', 'info');
     try {
-      if (DEMO_MODE) {
-        await new Promise((r) => setTimeout(r, 2200));
-        const newScore = 78;
-        const appealVerdict = `Dispute review completed: Worker grounds verified by 5 independent validator LLMs. Initial verdict overturned. Score updated to ${newScore}/100. Escrow released.`;
-
-        setTasks((prev) =>
-          prev.map((t) =>
-            t.id === taskId
-              ? {
-                  ...t,
-                  status: 'overturned',
-                  score: newScore,
-                  dispute_reason: reason,
-                  evaluation: appealVerdict,
-                }
-              : t
-          )
-        );
-        setSelectedTask((prev) =>
-          prev && prev.id === taskId
-            ? {
-                ...prev,
-                status: 'overturned',
-                score: newScore,
-                dispute_reason: reason,
-                evaluation: appealVerdict,
-              }
-            : prev
-        );
-        addToast(`⚖️ Dispute resolved for Task #${taskId}! Initial verdict overturned via GenLayer multi-agent consensus.`, 'success');
-      }
+      const pKey = wallet.privateKey || DEFAULT_CREATOR_KEY;
+      const { txHash, task } = await disputeTaskOnChain(pKey, taskId, reason, 'https://genlayer.arcstones.xyz/proof/dispute');
+      addToast(
+        `⚖️ Supreme AI Dispute resolved: Verdict ${task.status.toUpperCase()}! Tx: ${txHash.slice(0, 10)}...`,
+        'success'
+      );
+      await loadTasks();
+      setSelectedTask(task);
     } catch (err) {
-      addToast(`❌ Dispute Error: ${err.message}`, 'error');
+      console.error(err);
+      addToast(`❌ Dispute error: ${err.message}`, 'error');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, [addToast]);
+  }, [wallet.privateKey, loadTasks, addToast]);
 
   const filteredTasks = tasks.filter((t) => {
     if (statusFilter === 'all') return true;
@@ -1287,10 +1306,23 @@ export default function App() {
             <div className="logo-text">
               Agent<span>Escrow</span>
             </div>
-            <span className="header-badge">GenLayer StudioNet</span>
+            <span className="header-badge" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#059669', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+              GenLayer Studio Next (Chain 61997)
+            </span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {/* Live Sync / Reload Tasks */}
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={loadTasks}
+              title="Sync latest on-chain state"
+              style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+            >
+              <span>🔄</span>
+              <span>Sync Chain</span>
+            </button>
+
             {/* Agent Hub Button */}
             <button
               className="btn btn-outline btn-sm"
@@ -1353,6 +1385,16 @@ export default function App() {
                         <span className="mono" style={{ fontSize: 11, color: 'var(--text-muted)' }}>{shortenAddress(wallet.address)}</span>
                       </button>
 
+                      <a
+                        className="wallet-dropdown-item"
+                        href={`${EXPLORER_URL}/address/${wallet.address}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ textDecoration: 'none' }}
+                      >
+                        <span>🔍 View on Studio Explorer</span>
+                      </a>
+
                       <button className="wallet-dropdown-item" onClick={() => { setIsDropdownOpen(false); setIsWalletModalOpen(true); }}>
                         <span>🔄 Switch Identity / Wallet</span>
                       </button>
@@ -1375,19 +1417,27 @@ export default function App() {
         </div>
       </header>
 
-      {/* Contract Banner with subtle borders & responsive status */}
+      {/* Contract Banner with Studio Next Explorer links */}
       <div style={{ background: '#f8fafc', borderBottom: '1px solid var(--border-color)', padding: '10px 0', fontSize: '13px' }}>
         <div className="app-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 6px #10b981' }}></span>
-            <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Intelligent Contract:</span>
-            <code style={{ color: 'var(--accent-purple)', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '2px 8px', borderRadius: 'var(--radius-tag)', fontFamily: 'var(--font-mono)' }}>
-              0x3D3b48045395DDf3A3a46d13Cc7A585fefC2083C
-            </code>
+            <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Studio Next Contract:</span>
+            <a
+              href={`${EXPLORER_URL}/address/${CONTRACT_ADDRESS}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textDecoration: 'none' }}
+              title="View on GenLayer Studio Next Explorer"
+            >
+              <code style={{ color: 'var(--accent-purple)', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '2px 8px', borderRadius: 'var(--radius-tag)', fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+                {CONTRACT_ADDRESS}
+              </code>
+            </a>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', color: 'var(--text-muted)' }}>
-            <span>Tx: <code style={{ color: 'var(--text-secondary)' }}>0x3af5...9c58</code></span>
-            <span style={{ color: '#059669', fontWeight: 600 }}>● Quorum Finalized</span>
+            <span>Deploy Tx: <a href={`${EXPLORER_URL}/tx/${DEPLOY_TX_HASH}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-blue)', textDecoration: 'underline' }}><code>{DEPLOY_TX_HASH.slice(0, 10)}...</code></a></span>
+            <span style={{ color: '#059669', fontWeight: 600 }}>● GenVM Consensus Active</span>
           </div>
         </div>
       </div>
@@ -1604,7 +1654,7 @@ export default function App() {
       <footer className="footer">
         <div className="app-container">
           AgentEscrow · Built for <a href="https://portal.genlayer.foundation/agent-tank/" target="_blank" rel="noopener noreferrer">Agent Tank Hackathon</a>
-          {' '}· Intelligent Contracts on <a href="https://genlayer.com" target="_blank" rel="noopener noreferrer">GenLayer StudioNet</a>
+          {' '}· Intelligent Contracts on <a href={EXPLORER_URL} target="_blank" rel="noopener noreferrer">GenLayer Studio Next (Chain 61997)</a>
           {' '}· Decentralized Multi-Agent Dispute Resolution
         </div>
       </footer>

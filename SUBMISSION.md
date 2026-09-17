@@ -4,8 +4,14 @@
 **Tagline:** Trustless Escrow & Multi-Tier AI Dispute Resolution for Autonomous AI Agents  
 **Live Application:** [https://genlayer.arcstones.xyz/](https://genlayer.arcstones.xyz/)  
 **GitHub Repository:** [https://github.com/Alicepoltora/agent-escrow](https://github.com/Alicepoltora/agent-escrow)  
-**Contract Address (StudioNet):** `0x3D3b48045395DDf3A3a46d13Cc7A585fefC2083C`  
-**Deploy Transaction:** `0x3af54062ea61b29f18c0faba3fb7979da79af4d74d773def8d963bb69c0c9c58`  
+**Contract Address (Studio Next - Chain 61997):** [`0xE01D1CE3D823126A841b64475a3D97e9CfA1d009`](https://explorer-studio-dev.genlayer.com/address/0xE01D1CE3D823126A841b64475a3D97e9CfA1d009)  
+**Studio Next Explorer:** [https://explorer-studio-dev.genlayer.com/address/0xE01D1CE3D823126A841b64475a3D97e9CfA1d009](https://explorer-studio-dev.genlayer.com/address/0xE01D1CE3D823126A841b64475a3D97e9CfA1d009)  
+**Contract Deploy Tx:** [`0x6b61f77c8e85a30b1413528df2732079774c80d7b870b26c340cc9a90cf179f5`](https://explorer-studio-dev.genlayer.com/tx/0x6b61f77c8e85a30b1413528df2732079774c80d7b870b26c340cc9a90cf179f5)  
+**Live On-Chain Transaction Proofs (Chain 61997):**
+* **`create_task` Tx:** [`0x9d8ead39420fd90ca253217c69f16a0c97e3fb670d21e24b15f9ee7814121806`](https://explorer-studio-dev.genlayer.com/tx/0x9d8ead39420fd90ca253217c69f16a0c97e3fb670d21e24b15f9ee7814121806)
+* **`submit_work` Tx:** [`0x71b0461ad283c06f552ada401c6db70852dcfa2b8ce61e5578eb0237993d552a`](https://explorer-studio-dev.genlayer.com/tx/0x71b0461ad283c06f552ada401c6db70852dcfa2b8ce61e5578eb0237993d552a)
+* **`evaluate_task` (AI Consensus) Tx:** [`0x7d95862143cf89ae01a93b497b838590041fc0978a8313ea7ba6d88d8c94fa5c`](https://explorer-studio-dev.genlayer.com/tx/0x7d95862143cf89ae01a93b497b838590041fc0978a8313ea7ba6d88d8c94fa5c) — *Score 85/100, Accepted by Quorum*
+* **`dispute_task` (Supreme AI Arbitration) Tx:** [`0x57694361f2e192d9cabe6df5afcb593e3fc0cb8546e925938e1a800118efd140`](https://explorer-studio-dev.genlayer.com/tx/0x57694361f2e192d9cabe6df5afcb593e3fc0cb8546e925938e1a800118efd140) — *Verdict: UPHELD with written judicial justification*
 **3-Minute Demo Video (1080p MP4):** [https://genlayer.arcstones.xyz/media/AgentEscrow_Demo_Pitch.mp4](https://genlayer.arcstones.xyz/media/AgentEscrow_Demo_Pitch.mp4)  
 
 ---

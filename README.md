@@ -13,19 +13,23 @@
 ---
 
 ## 🌐 Live Deployments & Verification
-
-| Component | Target / Value |
-| :--- | :--- |
-| **Production Web3 dApp** | [https://genlayer.arcstones.xyz/](https://genlayer.arcstones.xyz/) |
-| **Official GitHub Repository** | [https://github.com/Alicepoltora/agent-escrow](https://github.com/Alicepoltora/agent-escrow) |
-| **Intelligent Contract Address** | **`0x3D3b48045395DDf3A3a46d13Cc7A585fefC2083C`** |
-| **Network** | GenLayer StudioNet (Chain ID: `61999` / `0xf22f`) |
-| **RPC Endpoint** | `https://studio.genlayer.com/api` |
-| **Deployer Wallet Address** | `0x5465D23AFAB92787a6bF05c8F4b743f25C25f012` |
-| **Contract Deploy Tx** | `0x3af54062ea61b29f18c0faba3fb7979da79af4d74d773def8d963bb69c0c9c58` |
-| **Consensus Finality** | `FINALIZED (MAJORITY_AGREE)` |
-| **Live Verified Task #0 Tx** | `0xeb397a3ee78d6a3a9ce71bd2e36278b3de241c54c3c814f3728b00f5a3900c1d` |
-| **Demo Pitch Video (1080p MP4)** | [Watch Video (genlayer.arcstones.xyz)](https://genlayer.arcstones.xyz/media/AgentEscrow_Demo_Pitch.mp4) |
+ 
+ | Component | Target / Value |
+ | :--- | :--- |
+ | **Production Web3 dApp** | [https://genlayer.arcstones.xyz/](https://genlayer.arcstones.xyz/) |
+ | **Official GitHub Repository** | [https://github.com/Alicepoltora/agent-escrow](https://github.com/Alicepoltora/agent-escrow) |
+ | **Intelligent Contract Address** | **[`0xE01D1CE3D823126A841b64475a3D97e9CfA1d009`](https://explorer-studio-dev.genlayer.com/address/0xE01D1CE3D823126A841b64475a3D97e9CfA1d009)** |
+ | **Network** | GenLayer Studio Next (Chain ID: `61997` / `0xf22d`) |
+ | **Explorer** | [https://explorer-studio-dev.genlayer.com](https://explorer-studio-dev.genlayer.com) |
+ | **RPC Endpoint** | `https://studio-dev.genlayer.com/api` |
+ | **Deployer Account** | `0x70BEEf62DB5F4a766E07387666f95e384C57EcCF` |
+ | **Contract Deploy Tx** | [`0x6b61f77c8e85a30b1413528df2732079774c80d7b870b26c340cc9a90cf179f5`](https://explorer-studio-dev.genlayer.com/tx/0x6b61f77c8e85a30b1413528df2732079774c80d7b870b26c340cc9a90cf179f5) |
+ | **Consensus Status** | `ACCEPTED / FINALIZED (Leader-Validator Quorum Reached)` |
+ | **Live Task #0 Created Tx** | [`0x9d8ead39420fd90ca253217c69f16a0c97e3fb670d21e24b15f9ee7814121806`](https://explorer-studio-dev.genlayer.com/tx/0x9d8ead39420fd90ca253217c69f16a0c97e3fb670d21e24b15f9ee7814121806) |
+ | **Live Work Submitted Tx** | [`0x71b0461ad283c06f552ada401c6db70852dcfa2b8ce61e5578eb0237993d552a`](https://explorer-studio-dev.genlayer.com/tx/0x71b0461ad283c06f552ada401c6db70852dcfa2b8ce61e5578eb0237993d552a) |
+ | **Live AI Consensus Eval Tx** | [`0x7d95862143cf89ae01a93b497b838590041fc0978a8313ea7ba6d88d8c94fa5c`](https://explorer-studio-dev.genlayer.com/tx/0x7d95862143cf89ae01a93b497b838590041fc0978a8313ea7ba6d88d8c94fa5c) |
+ | **Live Supreme Dispute Tx** | [`0x57694361f2e192d9cabe6df5afcb593e3fc0cb8546e925938e1a800118efd140`](https://explorer-studio-dev.genlayer.com/tx/0x57694361f2e192d9cabe6df5afcb593e3fc0cb8546e925938e1a800118efd140) |
+ | **Demo Pitch Video (1080p MP4)** | [Watch Video (genlayer.arcstones.xyz)](https://genlayer.arcstones.xyz/media/AgentEscrow_Demo_Pitch.mp4) |
 
 ---
 
@@ -204,13 +208,17 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 ### 3. Programmatic Agent Integration (Python)
 ```python
 import os
+import copy
 import genlayer_py as gl
 from eth_account import Account
 
-# Connect agent wallet
+# Connect agent wallet to GenLayer Studio Next (Chain 61997)
 agent_account = Account.from_key(os.getenv("GENLAYER_PRIVATE_KEY", "0x..."))
-client = gl.create_client(gl.studionet, account=agent_account)
-CONTRACT_ADDR = "0x3D3b48045395DDf3A3a46d13Cc7A585fefC2083C"
+studio_next = copy.deepcopy(gl.studionet)
+studio_next.id = 61997
+studio_next.rpc_urls = {'default': {'http': ['https://studio-dev.genlayer.com/api']}}
+client = gl.create_client(studio_next, account=agent_account)
+CONTRACT_ADDR = "0xE01D1CE3D823126A841b64475a3D97e9CfA1d009"
 
 # 1. Query an open task
 task = client.read_contract(CONTRACT_ADDR, "get_task", [1])
@@ -220,7 +228,7 @@ print(f"Task #{task['id']}: {task['spec']}")
 tx = client.write_contract(
     address=CONTRACT_ADDR,
     function_name="submit_work",
-    args=[1, "https://github.com/agent-tank/sample-deliverable", "https://x.com/agent_proof"]
+    args=[1, "Autonomous deliverable proof", "https://github.com/agent-tank/sample-deliverable"]
 )
 print("Work submitted on-chain:", tx)
 
@@ -236,7 +244,7 @@ client.write_contract(CONTRACT_ADDR, "evaluate_task", [1])
 agent-escrow/
 ├── contracts/
 │   ├── __init__.py
-│   └── agent_escrow.py            # GenLayer Intelligent Contract (10 methods)
+│   └── agent_escrow.py            # GenLayer Intelligent Contract (v0.3.0)
 ├── tests/
 │   └── direct/
 │       ├── conftest.py            # GenVM address fixtures
@@ -245,11 +253,12 @@ agent-escrow/
 │   ├── public/
 │   │   └── favicon.svg            # Circular metallic AE brand icon
 │   ├── src/
-│   │   ├── App.jsx                # Web3 portal, Connect Wallet, Agent Hub
+│   │   ├── App.jsx                # Web3 portal with real on-chain transactions
+│   │   ├── genlayer.js            # Studio Next contract SDK integration (viem/genlayer-js)
 │   │   └── index.css              # Custom modern light design system
 │   └── index.html
 ├── scripts/
-│   ├── deploy_contract.py         # Automated deployment script to StudioNet
+│   ├── deploy_studio_next.py      # Automated deployment script to Studio Next
 │   └── agent_flow_demo.py         # End-to-end simulation runner
 ├── artifacts/
 │   └── deployment.json            # On-chain contract & tx metadata
@@ -264,13 +273,14 @@ agent-escrow/
 
 ## 🏆 Hackathon Submission Checklist
 
-- [x] **Intelligent Contract written in Python**: Validated with `genvm-lint`.
-- [x] **Live on GenLayer StudioNet**: Finalized at `0x3D3b48045395DDf3A3a46d13Cc7A585fefC2083C`.
+- [x] **Intelligent Contract written in Python**: Validated with `genvm-lint` for GenVM v0.3.0.
+- [x] **Live on GenLayer Studio Next**: Finalized at `0xE01D1CE3D823126A841b64475a3D97e9CfA1d009`.
 - [x] **Non-Deterministic Capabilities**: Utilizes `gl.nondet.exec_prompt()` and `gl.nondet.web.render()`.
 - [x] **Equivalence Principle Enforced**: Deterministic consensus via invariant field matching.
 - [x] **Dispute Resolution Mechanism**: Direct realization of GenLayer's primary thesis.
 - [x] **Live Public dApp**: Deployed at [https://genlayer.arcstones.xyz/](https://genlayer.arcstones.xyz/) with SSL.
-- [x] **Comprehensive Test Suite**: 10 unit tests passing in 0.28s.
+- [x] **Real On-Chain Task Lifecycle**: No mock timers; real transaction hashes & contract reads.
+- [x] **Comprehensive Test Suite**: 10 unit tests passing.
 - [x] **Open Source Repository**: [https://github.com/Alicepoltora/agent-escrow](https://github.com/Alicepoltora/agent-escrow).
 
 ---

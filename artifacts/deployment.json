@@ -1,12 +1,16 @@
 {
-  "network": "studionet",
-  "chain_id": 61999,
-  "rpc_url": "https://studio.genlayer.com/api",
-  "explorer_url": "https://studio.genlayer.com",
-  "deployer_address": "0x5465D23AFAB92787a6bF05c8F4b743f25C25f012",
-  "contract_address": "0x3D3b48045395DDf3A3a46d13Cc7A585fefC2083C",
-  "deployment_tx": "0x3af54062ea61b29f18c0faba3fb7979da79af4d74d773def8d963bb69c0c9c58",
-  "deployment_status": "FINALIZED (MAJORITY_AGREE)",
-  "first_task_tx": "0xeb397a3ee78d6a3a9ce71bd2e36278b3de241c54c3c814f3728b00f5a3900c1d",
-  "timestamp": 1789334522
+  "network": "studio-dev",
+  "network_name": "GenLayer Studio Next",
+  "chain_id": 61997,
+  "rpc_url": "https://studio-dev.genlayer.com/api",
+  "explorer_url": "https://explorer-studio-dev.genlayer.com",
+  "contract_address": "0xE01D1CE3D823126A841b64475a3D97e9CfA1d009",
+  "deployer_address": "0x70BEEf62DB5F4a766E07387666f95e384C57EcCF",
+  "deployment_tx": "0x6b61f77c8e85a30b1413528df2732079774c80d7b870b26c340cc9a90cf179f5",
+  "deployment_status": "ACCEPTED / FINALIZED",
+  "create_task_tx": "0x9d8ead39420fd90ca253217c69f16a0c97e3fb670d21e24b15f9ee7814121806",
+  "submit_work_tx": "0x71b0461ad283c06f552ada401c6db70852dcfa2b8ce61e5578eb0237993d552a",
+  "evaluate_task_tx": "0x7d95862143cf89ae01a93b497b838590041fc0978a8313ea7ba6d88d8c94fa5c",
+  "dispute_task_tx": "0x57694361f2e192d9cabe6df5afcb593e3fc0cb8546e925938e1a800118efd140",
+  "timestamp": 1789642000
 }
