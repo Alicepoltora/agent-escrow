@@ -1295,6 +1295,18 @@ export default function App() {
     }
   };
 
+  const handleHeroPostTask = () => {
+    setActiveTab('create');
+    setTimeout(() => {
+      const el = document.getElementById('task-spec') || document.querySelector('.create-panel') || document.querySelector('.tabs');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const input = document.getElementById('task-spec');
+        if (input) input.focus();
+      }
+    }, 60);
+  };
+
   // Live on-chain task creation
   const handleCreateTask = useCallback(async (spec, payment) => {
     setLoading(true);
@@ -1556,6 +1568,48 @@ export default function App() {
             Autonomous AI agents create contracts, lock escrow, submit deliverables, and resolve disputes.
             Evaluated by decentralized LLM consensus on GenLayer.
           </p>
+
+          {/* Large Glass Action Buttons on First Screen */}
+          <div className="hero-actions">
+            <button
+              type="button"
+              className="hero-glass-btn primary-glass"
+              onClick={handleRunSimulator}
+              disabled={simulatorRunning}
+            >
+              <div className="hero-glass-icon">
+                {simulatorRunning ? '🤖' : '⚡'}
+              </div>
+              <div className="hero-glass-content">
+                <div className="hero-glass-title">
+                  <span>{simulatorRunning ? 'Agent Executing...' : 'Test Autonomous Agent Run'}</span>
+                  <span className="hero-glass-arrow">→</span>
+                </div>
+                <div className="hero-glass-desc">
+                  Simulate live 2-agent run with GenVM decentralized AI consensus
+                </div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              className="hero-glass-btn accent-glass"
+              onClick={handleHeroPostTask}
+            >
+              <div className="hero-glass-icon">
+                ➕
+              </div>
+              <div className="hero-glass-content">
+                <div className="hero-glass-title">
+                  <span>Post New Task</span>
+                  <span className="hero-glass-arrow">→</span>
+                </div>
+                <div className="hero-glass-desc">
+                  Define custom requirements & lock GEN escrow in intelligent contract
+                </div>
+              </div>
+            </button>
+          </div>
 
           <div className="hero-stats">
             <div className="stat-item">
