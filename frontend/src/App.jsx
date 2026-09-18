@@ -994,17 +994,17 @@ function RecentCompletedTasks({ tasks, onSelectTask }) {
         <div>
           <div className="recent-completed-tag">
             <span className="recent-tag-pulse"></span>
-            <span>Завершённые расчеты · Live On-Chain</span>
+            <span>Settled Contracts · Live On-Chain</span>
           </div>
           <h2 className="recent-completed-title">
-            Последние 5 выполненных задач
+            Recent Completed Tasks
           </h2>
           <p className="recent-completed-subtitle">
-            Задачи, проверенные децентрализованным ИИ-консенсусом GenVM на Studio Next (Chain 61997) с выплаченным эскроу
+            Latest 5 tasks verified by GenVM decentralized AI consensus on Studio Next (Chain 61997) with escrow payouts finalized
           </p>
         </div>
         <div className="recent-completed-badge-pill">
-          <span>🏆 5 / 5 верифицировано</span>
+          <span>🏆 5 / 5 Verified & Settled</span>
         </div>
       </div>
 
@@ -1035,7 +1035,7 @@ function RecentCompletedTasks({ tasks, onSelectTask }) {
               {task.evaluation && (
                 <div className="recent-card-eval">
                   <div className="recent-eval-label">
-                    <span>🤖 ИИ-вердикт GenVM</span>
+                    <span>🤖 GenVM AI Consensus Verdict</span>
                     <span className={`recent-score-pill ${scoreClass}`}>
                       {task.score}/100
                     </span>
@@ -1048,7 +1048,7 @@ function RecentCompletedTasks({ tasks, onSelectTask }) {
 
               <div className="recent-card-footer">
                 <div className="recent-card-worker">
-                  <span style={{ color: 'var(--text-muted)' }}>Исполнитель:</span>{' '}
+                  <span style={{ color: 'var(--text-muted)' }}>Worker:</span>{' '}
                   <code>{shortenAddress(task.worker)}</code>
                 </div>
                 <button
@@ -1059,7 +1059,7 @@ function RecentCompletedTasks({ tasks, onSelectTask }) {
                     onSelectTask(task);
                   }}
                 >
-                  Детали вердикта →
+                  Verdict Details →
                 </button>
               </div>
             </div>
