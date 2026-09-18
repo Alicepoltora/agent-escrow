@@ -979,6 +979,97 @@ function CreateTaskForm({ onCreateTask, loading, currentWallet }) {
   );
 }
 
+// ─── Recent Completed Tasks Showcase ─────────────────
+function RecentCompletedTasks({ tasks, onSelectTask }) {
+  const completedTasks = tasks
+    .filter((t) => ['accepted', 'overturned', 'upheld'].includes(t.status))
+    .sort((a, b) => b.id - a.id)
+    .slice(0, 5);
+
+  if (completedTasks.length === 0) return null;
+
+  return (
+    <section className="recent-completed-section">
+      <div className="recent-completed-header">
+        <div>
+          <div className="recent-completed-tag">
+            <span className="recent-tag-pulse"></span>
+            <span>Завершённые расчеты · Live On-Chain</span>
+          </div>
+          <h2 className="recent-completed-title">
+            Последние 5 выполненных задач
+          </h2>
+          <p className="recent-completed-subtitle">
+            Задачи, проверенные децентрализованным ИИ-консенсусом GenVM на Studio Next (Chain 61997) с выплаченным эскроу
+          </p>
+        </div>
+        <div className="recent-completed-badge-pill">
+          <span>🏆 5 / 5 верифицировано</span>
+        </div>
+      </div>
+
+      <div className="recent-completed-grid">
+        {completedTasks.map((task) => {
+          const scoreClass = task.score >= 70 ? 'score-high' : task.score >= 40 ? 'score-mid' : 'score-low';
+          return (
+            <div
+              key={task.id}
+              className="recent-task-card"
+              onClick={() => onSelectTask(task)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') onSelectTask(task);
+              }}
+            >
+              <div className="recent-card-head">
+                <span className="recent-task-id">#TASK-{task.id}</span>
+                <StatusBadge status={task.status} />
+                <span className="recent-card-pay">{formatGEN(task.payment_wei)} GEN</span>
+              </div>
+
+              <h4 className="recent-card-spec" title={task.spec}>
+                {task.spec}
+              </h4>
+
+              {task.evaluation && (
+                <div className="recent-card-eval">
+                  <div className="recent-eval-label">
+                    <span>🤖 ИИ-вердикт GenVM</span>
+                    <span className={`recent-score-pill ${scoreClass}`}>
+                      {task.score}/100
+                    </span>
+                  </div>
+                  <p className="recent-eval-text">
+                    "{task.evaluation}"
+                  </p>
+                </div>
+              )}
+
+              <div className="recent-card-footer">
+                <div className="recent-card-worker">
+                  <span style={{ color: 'var(--text-muted)' }}>Исполнитель:</span>{' '}
+                  <code>{shortenAddress(task.worker)}</code>
+                </div>
+                <button
+                  type="button"
+                  className="recent-card-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectTask(task);
+                  }}
+                >
+                  Детали вердикта →
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 // ─── Main App ─────────────────────────────────────────
 export default function App() {
   const [tasks, setTasks] = useState(INITIAL_TASKS);
@@ -1523,6 +1614,12 @@ export default function App() {
             </div>
           </div>
         </section>
+
+        {/* Recent Completed Tasks Section */}
+        <RecentCompletedTasks
+          tasks={tasks}
+          onSelectTask={setSelectedTask}
+        />
 
         {/* Navigation Tabs */}
         <div className="tabs">
