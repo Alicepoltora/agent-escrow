@@ -51,6 +51,31 @@ export async function fundAccount(address, amountGen = '50') {
   }
 }
 
+// Fetch real GEN balance from RPC
+export async function getAccountBalance(address) {
+  try {
+    const res = await fetch(RPC_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'eth_getBalance',
+        params: [address, 'latest'],
+        id: Date.now()
+      })
+    });
+    const data = await res.json();
+    if (data && data.result) {
+      const wei = BigInt(data.result);
+      const gen = Number(wei) / 1e18;
+      return gen.toFixed(2);
+    }
+  } catch (err) {
+    console.warn('Failed to fetch balance:', err);
+  }
+  return '0.00';
+}
+
 // Fetch all tasks directly from contract storage
 export async function fetchAllTasks() {
   const client = getReadClient();

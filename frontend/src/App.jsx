@@ -17,7 +17,8 @@ import {
   submitWorkOnChain,
   evaluateTaskOnChain,
   disputeTaskOnChain,
-  fundAccount
+  fundAccount,
+  getAccountBalance
 } from './genlayer';
 
 const DEMO_MODE = false;
@@ -1079,17 +1080,23 @@ export default function App() {
           }
         }
 
+        let bal = await getAccountBalance(userAddr);
+        if (parseFloat(bal) < 1.0) {
+          await fundAccount(userAddr, '50');
+          bal = await getAccountBalance(userAddr);
+        }
+
         setWallet({
           connected: true,
           address: userAddr,
-          balance: '25.0',
+          balance: bal || '50.00',
           type: 'browser',
           name: 'MetaMask Web3',
           role: 'Employer / Worker',
           privateKey: DEFAULT_CREATOR_KEY,
         });
         setIsWalletModalOpen(false);
-        addToast(`🦊 Connected browser wallet: ${shortenAddress(userAddr)} (Chain 61997)`, 'success');
+        addToast(`🦊 Connected browser wallet: ${shortenAddress(userAddr)} (${bal} GEN)`, 'success');
       }
     } catch (err) {
       addToast(`❌ Browser connection failed: ${err.message}`, 'error');
@@ -1099,35 +1106,40 @@ export default function App() {
   };
 
   // Connect as Autonomous AI Agent
-  const handleConnectAgent = (name, role, mockAddr, privateKey) => {
+  const handleConnectAgent = async (name, role, mockAddr, privateKey) => {
     const finalKey = privateKey || DEFAULT_WORKER_KEY;
     const finalAddr = mockAddr || DEFAULT_WORKER_ADDR;
-    fundAccount(finalAddr, '50');
+    let bal = await getAccountBalance(finalAddr);
+    if (parseFloat(bal) < 1.0) {
+      await fundAccount(finalAddr, '50');
+      bal = await getAccountBalance(finalAddr);
+    }
     setWallet({
       connected: true,
       address: finalAddr,
-      balance: '50.0',
+      balance: bal || '50.00',
       type: 'agent',
       name: name,
       role: role,
       privateKey: finalKey,
     });
-    addToast(`🤖 AI Agent Connected: ${name} (${role}) on Studio Next`, 'success');
+    addToast(`🤖 AI Agent Connected: ${name} (${bal} GEN)`, 'success');
   };
 
   // Connect to Studio Next Demo Account
-  const handleConnectDemo = () => {
+  const handleConnectDemo = async () => {
+    const bal = await getAccountBalance(DEFAULT_CREATOR_ADDR);
     setWallet({
       connected: true,
       address: DEFAULT_CREATOR_ADDR,
-      balance: '95.0',
+      balance: bal || '95.00',
       type: 'demo',
       name: 'Studio Next Dev',
       role: 'Creator / Employer',
       privateKey: DEFAULT_CREATOR_KEY,
     });
     setIsWalletModalOpen(false);
-    addToast('🔑 Connected to Studio Next Dev Account (95+ GEN on chain 61997)', 'success');
+    addToast(`🔑 Connected to Studio Next Dev Account (${bal} GEN)`, 'success');
   };
 
   const handleDisconnect = () => {
